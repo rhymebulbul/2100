@@ -17,16 +17,19 @@ Rhyme Bulbul 31865224
 
 int main(int argc, char *argv[])
 {
-    char str[] = "Success!\n";
+    char* append = "Append successful\n";
     char buffer[1024];
     int fd;
-    int whitespaces[10];
     int j=0;
+    char* home;
+    int destination = 1;
+    int numwords = 10;
+
 
 
     if (argc == 2){
         // use given file
-        char* home = getenv("HOME");
+        home = getenv("HOME");
         strcat(home, argv[1]);
         fd = open(home, O_RDONLY);
     } else {
@@ -34,20 +37,36 @@ int main(int argc, char *argv[])
         fd = open("sample", O_RDONLY);
     }
 
-  
+    for (int i=1; i<argc; i++){
+//        printf("%s\n", argv[i]);
+//        printf("%c\n", argv[i][0]);
+        if ( argv[i][0] == '-' ){
+            if ( argv[i][1] == 'a' ){
+                // destination: argv[i+1]
+//                printf("Option: %s\n",argv[i]);
+//                printf("Command: %s\n",argv[i+1]);
+                home = getenv("HOME");
+                strcat(home, argv[i+1]);
+                destination = open(home, O_APPEND | O_CREAT);
 
+                write(1, append, strlen(append));
 
-    
-    
-
+            } else if ( argv[i][1] == 'n' ){
+                // numword: argv[i+1]
+//                printf("Option: %s\n",argv[i]);
+//                printf("Command: %s\n",argv[i+1]);
+                numwords = atoi(argv[i+1]);
+                printf("%d\n", numwords);
+            }
+        }
+    }
 
     if ( fd < 0 ) {
         perror("File does not exist!");
         exit(1);
     } else {
-
         int r = read(fd, buffer, 1024);
-
+        int whitespaces[numwords];
         for (int i = 0; i < r; ++i) {
                 if (isspace(buffer[i])){
                     if (!isspace(buffer[i+1])){
@@ -57,29 +76,33 @@ int main(int argc, char *argv[])
                     }
             }
         }
-    
 
         lseek(fd, 0, SEEK_SET);
         read(fd, buffer, whitespaces[0]);
-        write(1, buffer, whitespaces[0]);
-        
-        if(j>9){
-            j = 9;
+        write(destination, buffer, whitespaces[0]);
+
+        //printf("%d %d\n", numwords, j);
+
+        if(j>numwords){
+            j = numwords-1;
         }
         //printf("%d\n", j);
         for(int i=0; i<j; i++){
             lseek(fd, whitespaces[i], SEEK_SET);
             int l = whitespaces[i+1]-whitespaces[i];
             read(fd, buffer, l);
-            write(1, buffer, l);
+            write(destination, buffer, l);
         }
-        exit(0);
-        
+
+
     }
 
+    close(destination);
 
     close(fd);
-    
+    //exit(0);
     return 0;
 }
+
+
 
