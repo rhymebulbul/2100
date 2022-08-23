@@ -11,15 +11,12 @@ Rhyme Bulbul 31865224
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <ctype.h>
-#include<stdio.h>
 
 int main(int argc, char *argv[])
 {
     /*
      *  Function to output the first 10 words of the sample file.
      *  Shows entire file contents if the file contains less than 10 words.
-     *  @arguments
-     *  @return
      */
     int filedescriptor, wordlength;
     int wordsprinted = 0;
@@ -58,9 +55,8 @@ int main(int argc, char *argv[])
             read(filedescriptor, buffer, wordlength);   // Read word into buffer
             write(1, buffer, wordlength);   // Print word from buffer
         }
+        close(filedescriptor);
         exit(0);
     }
-    close(filedescriptor);
-    return 0;
 }
 
