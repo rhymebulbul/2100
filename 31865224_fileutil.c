@@ -23,53 +23,43 @@ int fileutil(char *sourcefile, char *destfile, int numwords){
      *  @numwords: number of words to write from source file
      *  Output: displays or writes number of words from source file
      */
-    int filedescriptor, wordlength;
+
+    int filedescriptor,  written;
+    char* appendsuccessful ="Append successful!\n";
     int destinationdescriptor = 1;
     int wordsprinted = 0;
-    char buffer[1024];
+    int buffersize = 65536;
+    char buffer[buffersize];
     int whitespaces[numwords];
+    int filelength = 0;
+    // Check to display or append
+    if (destfile){  // Append to destination file if provided
+        destinationdescriptor = open(destfile, O_WRONLY | O_APPEND | O_CREAT, 0664);   // Open fd to destination file in append
+    }
     // Open file from given path in read only mode and store file descriptor
-    filedescriptor = open(sourcefile, O_RDONLY);
+    filedescriptor = open(sourcefile, O_RDONLY, 0664);
     // Check if file descriptor is valid
     if ( filedescriptor<0 ) { // Print error if failed to open file and exit with status one
         perror(strerror(1));
         exit(1);
     } else { // Proceed if file opened succeessfully
         // Read file length in number of chars
-        int filelength = read(filedescriptor, buffer, 1024);
-        // Iterate over each char and check for whitespaces
-        for (int i = 0; i < filelength; ++i) {
-            if (isspace(buffer[i])){ // Checks if the current char is a whitespace
-                if (!isspace(buffer[i+1])){ // Checks if the next char is a char and not a whitespace
-                    whitespaces[wordsprinted] = i; // Stores the location of the whitespace
-                    wordsprinted++; // Increments counter for stored whitespace locations
+        filelength = read(filedescriptor, buffer, buffersize);
+        for (int i = 0; i < filelength; ++i){   // Iterate over all characters in file
+            if(wordsprinted < numwords){    // Only iterates over first n words
+                if(isspace(buffer[i])){     // Checks for whitespace
+                    whitespaces[wordsprinted] = i;  // Stores locations of each whitespace
+                    wordsprinted++;     // Increment count of whitespaces and so words counted
                 }
             }
         }
-        // Check to display or append
-        if (destfile){  // Append to destination file if provided
-            destinationdescriptor = open(destfile, O_WRONLY | O_APPEND | O_CREAT, 0664);   // Open fd to destination file in append
-        }
-        // Print first word
-        lseek(filedescriptor, 0, SEEK_SET); // Move file offset to beginning of file
-        read(filedescriptor, buffer, whitespaces[0]);   // Reads in chars by char till first whitespace
-        //lseek(destinationdescriptor, 0, SEEK_SET); // Move file offset to beginning of file
-        write(destinationdescriptor, buffer, whitespaces[0]);   // Writes out first word to console
-        // Checks if there are more than 10 words in sample file and ignores the rest
-        if (wordsprinted>numwords-1) { // Check if more than 10 words
-            wordsprinted = numwords-1; // Ignore words after the 10th
-        }
-        // Print rest of the words
-        for(int i=0; i<wordsprinted; i++){  // Iterate over at least first 10 words of sample file
-            lseek(filedescriptor, whitespaces[i], SEEK_SET);    // Move file offset to start of this word
-            wordlength = whitespaces[i+1] - whitespaces[i]; // Get length of word to print
-            read(filedescriptor, buffer, wordlength);   // Read word into buffer
-            //lseek(destinationdescriptor, whitespaces[i], SEEK_SET);
-            write(destinationdescriptor, buffer, wordlength);   // Print word from buffer
+        // Write the first numwords at least from file
+        written = write(destinationdescriptor, buffer, whitespaces[wordsprinted-1]);   // Writes out first word to console
+        if (written > 0 && destinationdescriptor > 1){  // check if append successful
+            write(1, appendsuccessful, strlen(appendsuccessful));
         }
         close(filedescriptor);
         close(destinationdescriptor);
-
     }
     return 0;
 }
