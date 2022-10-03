@@ -2,7 +2,8 @@
  * Monash University
  * FIT2100 - Operating Systems
  * In-semester Assignment Part B
- * Task 1 : FCFS, First Come First Serve Scheduling
+ * Task 1 : Non-preemptive Scheduling
+ * FCFS, First Come First Serve Scheduling
  * Created by rhyme on 23/9/22.
  */
 #include <stdio.h>
@@ -132,8 +133,9 @@ void schedule(){
     int timeCounter = 0;   /// Counts time in seconds
     int pcbCounter = 0;    /// Counts Process block being serviced
 
+
     /// While processes still exist in the system
-    while(timeCounter < 22){
+    while(currentRunningProcess<totalProcesses-1){
         /// For each second that passes, iterate over ready processes and pick first
         if (isFree && arrived_processes[currentRunningProcess].state == READY && currentRunningProcess > 0) {
             arrived_processes[currentRunningProcess].state = RUNNING;  /// Set ready process to running as it moves onto CPU
@@ -142,10 +144,11 @@ void schedule(){
             arrived_processes[currentRunningProcess].remainingTime--;   /// Decrement remaining time to run
         }
         /// Check if any process has arrived at this currentRunningProcess second
-        if (arrival_times[pcbCounter] == timeCounter){   // TODO: Check if other processes aarrive at sametime - while around if
+        if (arrival_times[pcbCounter] == timeCounter){   /// Check for processes arriving at this time
+            new_pcb:  /// Jump back here if more than one process arrives in the system at the same time
             printf("Time% 5d:  %s has entered the system.\n", arrival_times[pcbCounter], process_names[pcbCounter]);
-            /// Since process has arrived at this second, create PCB and store relevant data
-            pcb_t newly_arrived;
+            /// Since process has arrived at this second, create PCB and allocate relevant data from stored arrays
+            pcb_t newly_arrived;  /// Initialize PCB
             strcpy(newly_arrived.process_name ,process_names[pcbCounter]);
             newly_arrived.entryTime = arrival_times[pcbCounter];
             newly_arrived.serviceTime = service_times[pcbCounter];
@@ -157,7 +160,10 @@ void schedule(){
                 newly_arrived.waitTime++;
             }
             arrived_processes[pcbCounter] = newly_arrived;   /// Add PCB to queue
-            pcbCounter++;
+            pcbCounter++;   /// Move counter to next PCB
+            if (arrival_times[pcbCounter] == arrival_times[pcbCounter-1]){  /// Check if next previous process arrived at the same moment
+                goto new_pcb;
+            }
         }
         /// For each second that passes, iterate over ready processes and pick first
         if (isFree && arrived_processes[currentRunningProcess].state == READY && currentRunningProcess == 0) {
@@ -176,7 +182,7 @@ void schedule(){
             }
         }
         /// Exit process and terminate
-        if (currentRunningProcess >= 0 && currentRunningProcess < totalProcesses && arrived_processes[currentRunningProcess].remainingTime == 0){
+        if (currentRunningProcess >= 0 && currentRunningProcess < totalProcesses-1 && arrived_processes[currentRunningProcess].remainingTime == 0){
             printf("Time% 5d:  %s has finished execution.\n", timeCounter, arrived_processes[currentRunningProcess].process_name);
             /// Read wait time from PCB and store in array wait time
             wait_times[currentRunningProcess] = arrived_processes[currentRunningProcess].waitTime;
@@ -194,25 +200,22 @@ void schedule(){
             pcb_t dead;
             arrived_processes[currentRunningProcess] = dead;
             currentRunningProcess++;   /// Move to next process to be serviced
+
         }
         //sleep(1); TODO: make sleep to wait
         timeCounter++;
     }
-//    /// Check wait times  TODO: Remove check
-//    for (int j=0; j < pcbCounter; j++){
-//            printf("%s   %d   %d   %d \n", process_names[j], wait_times[j], turnaround_times[j], deadlines_met[j]);
-//    }
 }
 
 void write_processes(){
-    char * path = "results-task1.txt";
+    char * path = "results-1.txt";
     /// Declare file pointer
     FILE *fptr;
     char whitespace = ' ';
     /// open the file from path in write mode
     fptr = fopen(path, "wb"); //"ab+");
     /// Iterate over each process in system and write stats to results file
-    for (int i=0; i < totalProcesses; i++){
+    for (int i=0; i < totalProcesses-1; i++){
         /// Each each_process of the results holds one process only
         char * process_name = process_names[i];  /// Store pointer to current process name
         fwrite(process_name, 1, strlen(process_name), fptr);   /// Write Process name to current line
@@ -257,3 +260,4 @@ int main(int argc, char *argv[]) {
     write_processes();
     return 0;
 }
+
