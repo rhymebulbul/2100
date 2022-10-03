@@ -135,74 +135,71 @@ void schedule(){
 
 
     /// While processes still exist in the system
-    while(currentRunningProcess<totalProcesses-1){
-        /// For each second that passes, iterate over ready processes and pick first
-        if (isFree && arrived_processes[currentRunningProcess].state == READY && currentRunningProcess > 0) {
-            arrived_processes[currentRunningProcess].state = RUNNING;  /// Set ready process to running as it moves onto CPU
-            isFree = false;   /// Denote CPU is busy
-            printf("Time% 5d:  %s is in the running state.\n", timeCounter - 1, arrived_processes[currentRunningProcess].process_name);
-            arrived_processes[currentRunningProcess].remainingTime--;   /// Decrement remaining time to run
-        }
+    while(currentRunningProcess < totalProcesses-1){
         /// Check if any process has arrived at this currentRunningProcess second
-        if (arrival_times[pcbCounter] == timeCounter){   /// Check for processes arriving at this time
+        if (arrival_times[pcbCounter] == timeCounter) {   /// Check for processes arriving at this time
             new_pcb:  /// Jump back here if more than one process arrives in the system at the same time
             printf("Time% 5d:  %s has entered the system.\n", arrival_times[pcbCounter], process_names[pcbCounter]);
             /// Since process has arrived at this second, create PCB and allocate relevant data from stored arrays
             pcb_t newly_arrived;  /// Initialize PCB
-            strcpy(newly_arrived.process_name ,process_names[pcbCounter]);
+            strcpy(newly_arrived.process_name, process_names[pcbCounter]);
             newly_arrived.entryTime = arrival_times[pcbCounter];
             newly_arrived.serviceTime = service_times[pcbCounter];
-            newly_arrived.remainingTime = service_times[pcbCounter] + 1;
+            newly_arrived.remainingTime = service_times[pcbCounter];
             newly_arrived.deadline = deadlines[pcbCounter];
             newly_arrived.state = READY;
-            newly_arrived.waitTime = -1;
-            if (pcbCounter == 0){ /// Include arrived second for first process
-                newly_arrived.waitTime++;
-            }
+            newly_arrived.waitTime = 0;
             arrived_processes[pcbCounter] = newly_arrived;   /// Add PCB to queue
             pcbCounter++;   /// Move counter to next PCB
-            if (arrival_times[pcbCounter] == arrival_times[pcbCounter-1]){  /// Check if next previous process arrived at the same moment
+            if (arrival_times[pcbCounter] ==
+                arrival_times[pcbCounter - 1]) {  /// Check if next previous process arrived at the same moment
                 goto new_pcb;
             }
         }
-        /// For each second that passes, iterate over ready processes and pick first
-        if (isFree && arrived_processes[currentRunningProcess].state == READY && currentRunningProcess == 0) {
-            arrived_processes[currentRunningProcess].state = RUNNING;  /// Set ready process to running as it moves onto CPU
-            isFree = false;  /// Denote CPU is busy
-            printf("Time% 5d:  %s is in the running state.\n", timeCounter, arrived_processes[currentRunningProcess].process_name);
-        }
-        /// Keep decrementing time for running process each turn
-        if (!isFree && arrived_processes[currentRunningProcess].state == RUNNING) {
-            arrived_processes[currentRunningProcess].remainingTime--;  /// Decrement remaining time to run
-        }
-        /// Iterate over all waiting [READY] processes in the system and increment wait time
-        for (int j=0; j < pcbCounter; j++){
-            if (arrived_processes[j].state == READY){    /// Check if process is waiting in the queue
-                arrived_processes[j].waitTime ++;   /// Increment wait time
-            }
-        }
         /// Exit process and terminate
-        if (currentRunningProcess >= 0 && currentRunningProcess < totalProcesses-1 && arrived_processes[currentRunningProcess].remainingTime == 0){
-            printf("Time% 5d:  %s has finished execution.\n", timeCounter, arrived_processes[currentRunningProcess].process_name);
+        if (currentRunningProcess < totalProcesses - 1 &&
+            arrived_processes[currentRunningProcess].remainingTime == 0) {
+            printf("Time% 5d:  %s has finished execution.\n", timeCounter,
+                   arrived_processes[currentRunningProcess].process_name);
             /// Read wait time from PCB and store in array wait time
             wait_times[currentRunningProcess] = arrived_processes[currentRunningProcess].waitTime;
             /// Update & calculate: turnaround time = service time + wait time
-            turnaround_times[currentRunningProcess] = arrived_processes[currentRunningProcess].serviceTime + arrived_processes[currentRunningProcess].waitTime;
+            turnaround_times[currentRunningProcess] =
+                    arrived_processes[currentRunningProcess].serviceTime + wait_times[currentRunningProcess];
             /// Update & calculate if deadline is met for process
-            if (turnaround_times[currentRunningProcess] <= arrived_processes[currentRunningProcess].deadline){
+            if (turnaround_times[currentRunningProcess] <= arrived_processes[currentRunningProcess].deadline) {
                 deadlines_met[currentRunningProcess] = 1;
             } else {
                 deadlines_met[currentRunningProcess] = 0;
             }
             arrived_processes[currentRunningProcess].state = EXIT;    /// Terminate process and move off CPU
             isFree = true;   /// Denote CPU is free now
-            /// TODO: Remove and dellocate PCB once process has terminated [EXIT]
             pcb_t dead;
             arrived_processes[currentRunningProcess] = dead;
             currentRunningProcess++;   /// Move to next process to be serviced
-
         }
-        //sleep(1); TODO: make sleep to wait
+        /// For each second that passes, iterate over ready processes and pick first
+        if (isFree && arrived_processes[currentRunningProcess].state == READY) {
+            arrived_processes[currentRunningProcess].state = RUNNING;  /// Set ready process to running as it moves onto CPU
+            isFree = false;  /// Denote CPU is busy
+            printf("Time% 5d:  %s is in the running state.\n", timeCounter,
+                   arrived_processes[currentRunningProcess].process_name);
+        }
+        /// For each second that passes, iterate over ready processes and pick first
+        if (isFree && arrived_processes[currentRunningProcess].state == READY && currentRunningProcess > 0) {
+            arrived_processes[currentRunningProcess].remainingTime--;   /// Decrement remaining time to run
+        }
+        /// Keep decrementing time for running process each turn
+        if (!isFree && arrived_processes[currentRunningProcess].state == RUNNING) {
+            arrived_processes[currentRunningProcess].remainingTime--;  /// Decrement remaining time to run
+        }
+        /// Iterate over all waiting [READY] processes in the system and increment wait time
+        for (int j = 0; j < pcbCounter; j++) {
+            if (arrived_processes[j].state == READY) {    /// Check if process is waiting in the queue
+                arrived_processes[j].waitTime++;   /// Increment wait time
+            }
+        }
+        sleep(1);
         timeCounter++;
     }
 }
@@ -260,4 +257,5 @@ int main(int argc, char *argv[]) {
     write_processes();
     return 0;
 }
+
 
