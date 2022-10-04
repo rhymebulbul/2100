@@ -12,6 +12,7 @@
 #include <ctype.h>
 #include <stdbool.h>
 #include <wchar.h>
+#include<unistd.h>
 
 #define maxProcesses 100
 char process_names[maxProcesses][11];  /// Holds all process names
@@ -132,8 +133,7 @@ void schedule(){
     bool isFree = true;  /// Boolean flag to check if system is free to take new process
     int timeCounter = 0;   /// Counts time in seconds
     int pcbCounter = 0;    /// Counts Process block being serviced
-
-
+    
     /// While processes still exist in the system
     while(currentRunningProcess < totalProcesses-1){
         /// Check if any process has arrived at this currentRunningProcess second
@@ -257,5 +257,4 @@ int main(int argc, char *argv[]) {
     write_processes();
     return 0;
 }
-
 
