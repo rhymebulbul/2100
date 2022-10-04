@@ -133,7 +133,7 @@ void schedule(){
     bool isFree = true;  /// Boolean flag to check if system is free to take new process
     int timeCounter = 0;   /// Counts time in seconds
     int pcbCounter = 0;    /// Counts Process block being serviced
-    
+
     /// While processes still exist in the system
     while(currentRunningProcess < totalProcesses-1){
         /// Check if any process has arrived at this currentRunningProcess second
@@ -174,8 +174,6 @@ void schedule(){
             }
             arrived_processes[currentRunningProcess].state = EXIT;    /// Terminate process and move off CPU
             isFree = true;   /// Denote CPU is free now
-            pcb_t dead;
-            arrived_processes[currentRunningProcess] = dead;
             currentRunningProcess++;   /// Move to next process to be serviced
         }
         /// For each second that passes, iterate over ready processes and pick first
@@ -257,4 +255,3 @@ int main(int argc, char *argv[]) {
     write_processes();
     return 0;
 }
-
