@@ -5,6 +5,17 @@
  * Task 2 : Preemptive Scheduling
  * RR, Round Robin scheduling with time quantum of 2
  * Created by rhyme on 23/9/22.
+ *
+ * Reads in process file. Stores data. Creates PCBs as processes arrive. Outputs arrival, running and exit times
+ *      to the user. Schedules each process for a time quantum of 2 seconds as they arrive and then moves on to the
+ *      next. Services waiting processes at the end of each round. Calculates wait time and turnaround time for each
+ *      process and then whether it's met its deadline. Write results to text file
+ *
+ * Created by rhyme on 23/9/22.
+ * Last modified date 7/10/22
+ *
+ * References:
+ *      1. https://en.wikipedia.org/wiki/Round-robin_scheduling/
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,7 +23,7 @@
 #include <ctype.h>
 #include <stdbool.h>
 #include <wchar.h>
-#include<unistd.h>
+#include <unistd.h>
 
 #define maxProcesses 100
 char process_names[maxProcesses][11];  /// Holds all process names
@@ -50,6 +61,11 @@ typedef struct {
 void store_processes(char* line, int processNumber){
     /*
      * Reads in each process data line from text file and stores name, arrival, service and deadlines in array
+     *
+     * :arguments:
+     *      line: Pointer to start of line we are reading
+     *      processNumber: Process/line number we are reading, used to store data
+     * :return: void
      */
     char process_name[11];  /// Character array to store process name
     char arrival_time_string[11];   /// Character array to store arrival name
@@ -103,6 +119,10 @@ void store_processes(char* line, int processNumber){
 void read_processes(char *process_file) {
     /*
      * Opens process file, reads in each process line by line and stores data in respective arrays
+     *
+     * :arguments:
+     *      process_file: Pointer to file name, contains process data
+     * :return: void
      */
     FILE * fptr;  /// File pointer to process file
     char * line = NULL; /// char pointer for each line of file
@@ -126,8 +146,11 @@ void read_processes(char *process_file) {
 
 void schedule(){
     /*
-     * Schedules all processes based on FCFS (First Come First Serve)
-     */
+    * Schedules all processes based on Round Robin with a quantum time of 2
+    *
+    * :arguments: None
+    * :return: void
+    */
     const int timeQuantum = 2;   /// Time quantum for Robin Rounds
     pcb_t ready_queue[100];    /// Array of PCBs as they arrive in the system
     int currentRunningProcess = 0;/// Keep track of process which is currently running in the system
@@ -141,7 +164,6 @@ void schedule(){
             /// If process still needs to be serviced
             if (pcbCounter < totalProcesses-1){  /// Until PCBs have been created for all processes in system
                 printf("Time% 5d:  %s has entered the system.\n", arrival_times[i], process_names[i]);
-                // TODO: create PCB
                 pcb_t newly_arrived;  /// Initialize PCB with values
                 strcpy(newly_arrived.process_name, process_names[pcbCounter]);
                 newly_arrived.entryTime = arrival_times[pcbCounter];
@@ -177,7 +199,7 @@ void schedule(){
                     } else {
                         deadlines_met[i] = 0;   /// Turnaround > Deadline
                     }
-
+                    /// Kill Process, set state to EXIT
                     printf("Time% 5d:  %s has finished execution.\n", timeCounter,ready_queue[i].process_name);
                     ready_queue[i].state = EXIT;
                 }
@@ -191,6 +213,12 @@ void schedule(){
 }
 
 void write_processes(){
+    /*
+    * Takes each data array and writes process data to results file
+    *
+    * :arguments: None
+    * :return: void
+    */
     char * path = "results-2.txt";
     /// Declare file pointer
     FILE *fptr;
@@ -226,7 +254,12 @@ void write_processes(){
 int main(int argc, char *argv[]) {
     /*
      * Main function called upon start. Uses command line arguments as file path if provided.
-     * Runs FCFS (First Come First Serve) scheduling to handle processes and outputs results to text file
+     * Runs Round Robin scheduling to handle processes and outputs results to text file
+     *
+     * :arguments:
+     *      argc: Total number of command line arguments passed
+     *      *argv[]: Pointer to array storing all command line arguments passed
+     * :return: 0 as program exits
      */
     char* path = "processes.txt";
     /// Set file path passed as argument
