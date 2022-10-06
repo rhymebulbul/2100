@@ -15,7 +15,9 @@
  * Last modified date 7/10/22
  *
  * References:
- *      1. https://en.wikipedia.org/wiki/Round-robin_scheduling/
+ *      1. Wikimedia Foundation. (2022, August 3). Round-robin scheduling.
+ *          Wikipedia. Retrieved October 5, 2022,
+ *          from https://en.wikipedia.org/wiki/Round-robin_scheduling
  */
 #include <stdio.h>
 #include <stdlib.h>
