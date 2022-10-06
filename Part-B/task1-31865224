@@ -13,7 +13,9 @@
  * Last modified date 7/10/22
  *
  * References:
- *      1. https://en.wikipedia.org/wiki/Scheduling_(computing)/
+ *      1. Wikimedia Foundation. (2022, September 28). Scheduling (computing).
+ *          Wikipedia. Retrieved October 5, 2022,
+ *          from https://en.wikipedia.org/wiki/Scheduling_(computing)
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -180,7 +182,7 @@ void schedule(){
         }
         /// Exit process and terminate
         if (currentRunningProcess < totalProcesses - 1 &&
-            arrived_processes[currentRunningProcess].remainingTime == 0) {
+            arrived_processes[currentRunningProcess].remainingTime == 0 && pcbCounter>1) {
             printf("Time% 5d:  %s has finished execution.\n", timeCounter,
                    arrived_processes[currentRunningProcess].process_name);
             /// Read wait time from PCB and store in array wait time
