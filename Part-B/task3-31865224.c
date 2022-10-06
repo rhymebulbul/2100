@@ -14,7 +14,9 @@
  * Last modified date 7/10/22
  *
  * References:
- *      1. https://en.wikipedia.org/wiki/Deadline-monotonic_scheduling/
+ *      1. Wikimedia Foundation. (2022, August 3). Round-robin scheduling.
+ *          Wikipedia. Retrieved October 5, 2022,
+ *          from https://en.wikipedia.org/wiki/Round-robin_scheduling
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -191,6 +193,7 @@ void schedule(){
             /// Jump to process with shortest deadline
             currentRunningProcess = shortest;
         }
+
         /// Service Process with shortest deadline if it needs and it is not a terminated Process
         if (ready_queue[currentRunningProcess].state != EXIT && ready_queue[currentRunningProcess].remainingTime>0){
             if(ready_queue[currentRunningProcess].remainingTime == ready_queue[currentRunningProcess].serviceTime){  /// If Process just started/entered
