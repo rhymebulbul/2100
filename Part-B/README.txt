@@ -78,5 +78,9 @@
                                 number of deadlines met. This works best if the shorter processes are likely
                                 to meet their deadline if serviced right away.
 
-                            *This priority however, might not be the one we want or the best for the system.
-                            
+                            * If a Process fails to meet its deadline, the next waiting service is switched
+                                out immediately, minimising wait times and maximising deadlines being met.
+                                We later service processes which failed their deadline when there are no
+                                processes waiting,
+
+                            * This priority however, might not be the one we want or the best for the system.
